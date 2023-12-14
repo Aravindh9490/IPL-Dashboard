@@ -1,10 +1,22 @@
 import {Component} from 'react'
+
+import {Link} from 'react-router-dom'
+import {
+  PieChart,
+  Pie,
+  Sector,
+  Cell,
+  ResponsiveContainer,
+  Legend,
+} from 'recharts'
 import Loader from 'react-loader-spinner'
 
 import LatestMatch from '../LatestMatch'
 import MatchCard from '../MatchCard'
 
 import './index.css'
+
+const matchData = {Won: 0, Lost: 0, Drawn: 0}
 
 const teamMatchesApiUrl = 'https://apis.ccbp.in/ipl/'
 
@@ -18,19 +30,28 @@ class TeamMatches extends Component {
     this.getTeamMatches()
   }
 
-  getFormattedData = data => ({
-    umpires: data.umpires,
-    result: data.result,
-    manOfTheMatch: data.man_of_the_match,
-    id: data.id,
-    date: data.date,
-    venue: data.venue,
-    competingTeam: data.competing_team,
-    competingTeamLogo: data.competing_team_logo,
-    firstInnings: data.first_innings,
-    secondInnings: data.second_innings,
-    matchStatus: data.match_status,
-  })
+  getFormattedData = data => {
+    if (data.match_status === 'Won') {
+      matchData.Won += 1
+    } else if (data.match_status === 'Lost') {
+      matchData.Lost += 1
+    } else {
+      matchData.Drawn += 1
+    }
+    return {
+      umpires: data.umpires,
+      result: data.result,
+      manOfTheMatch: data.man_of_the_match,
+      id: data.id,
+      date: data.date,
+      venue: data.venue,
+      competingTeam: data.competing_team,
+      competingTeamLogo: data.competing_team_logo,
+      firstInnings: data.first_innings,
+      secondInnings: data.second_innings,
+      matchStatus: data.match_status,
+    }
+  }
 
   getTeamMatches = async () => {
     const {match} = this.props
@@ -63,6 +84,46 @@ class TeamMatches extends Component {
     )
   }
 
+  picChart = () => {
+    const k = 'k'
+    const datas = [
+      {name: 'Won', value: matchData.Won, color: '#a44c9e'},
+      {name: 'Lost', value: matchData.Lost, color: '#fecba6'},
+      {name: 'Drawn', value: matchData.Drawn, color: '#b3d23f'},
+    ]
+    console.log(datas)
+
+    return (
+      <div className="chart">
+        <ResponsiveContainer width="100%" height={250}>
+          <PieChart>
+            <Pie
+              cx="50%"
+              cy="50%"
+              data={datas}
+              startAngle={0}
+              endAngle={360}
+              labelLine={false}
+              innerRadius="70%"
+              outerRadius="100%"
+              dataKey="value"
+            >
+              {datas.map(e => (
+                <Cell name={e.name} fill={e.color} key={e.value} />
+              ))}
+            </Pie>
+            <Legend
+              iconType="circle"
+              layout="vertical"
+              verticalAlign="middle"
+              align="right"
+            />
+          </PieChart>
+        </ResponsiveContainer>
+      </div>
+    )
+  }
+
   renderTeamMatches = () => {
     const {teamMatchesData} = this.state
     const {teamBannerURL, latestMatch} = teamMatchesData
@@ -71,6 +132,7 @@ class TeamMatches extends Component {
       <div className="responsive-container">
         <img src={teamBannerURL} alt="team banner" className="team-banner" />
         <LatestMatch latestMatchData={latestMatch} />
+        {this.picChart()}
         {this.renderRecentMatchesList()}
       </div>
     )
@@ -115,6 +177,11 @@ class TeamMatches extends Component {
 
     return (
       <div className={className}>
+        <Link to="/">
+          <button className="backButton" type="button">
+            Back
+          </button>
+        </Link>
         {isLoading ? this.renderLoader() : this.renderTeamMatches()}
       </div>
     )

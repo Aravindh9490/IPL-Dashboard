@@ -66,3 +66,16 @@
     margin-top: 32px;
   }
 }
+.backButton {
+  background-color: black;
+  color: #ffffff;
+  border-radius: 8px;
+  margin-top: 10px;
+  padding: 10px;
+  border: none;
+  align-self: flex-start;
+  cursor: pointer;
+}
+.chart {
+  text-align: center;
+}
